@@ -1,7 +1,5 @@
 import pygame as p
-import sys
-import time
-import random
+import sys, time, random
 
 p.init()
 
@@ -71,7 +69,6 @@ last_spawn_time = 0
     
 
 
-p.draw.rect(screen, Blue, (player_pos_x, player_pos_y, player_size_x, player_size_y))
 
 
 p.display.set_caption("FlappyWariar")
@@ -135,7 +132,6 @@ while running:
     monsters_to_remove = []
 
     for bullet in bullets:
-        p.draw.rect(screen, bullet_color, (bullet[0], bullet[1], bullet_size, bullet_size))
         bullet[1] -= bullet_speed
 
         if bullet[1] < -30:
@@ -159,7 +155,6 @@ while running:
         last_spawn_time = current_time
 
     for monster in monsters:
-        p.draw.rect(screen, Dark_green, (monster[0], monster[1], monster_size_x, monster_size_y))
         monster[1] += monster_speed
 
         # Canavarın alt kenarı ekrandan çıkarsa listeden kaldır
@@ -167,7 +162,39 @@ while running:
             monsters.remove(monster)
 
     if draw_engine:
-        p.draw.rect(screen, Red, (player_pos_x, player_pos_y, player_size_x, player_size_y))
+        # Resim yükleme
+        player_image_path = "assets//image//player.png" 
+        player_image = p.image.load(player_image_path)
+        
+        bullet_image_path = "assets//image//bullet.png" 
+        bullet_image = p.image.load(bullet_image_path)
+        
+        fatman_image_path = "assets//image//fat_man.png" 
+        fatman_image = p.image.load(fatman_image_path)
+        
+        # Resim boyutlandırma
+        player_image_y = player_size_y
+        player_image_x = player_size_x
+        player_image = p.transform.scale(player_image, (player_image_x, player_image_y))
+        
+        bullet_image_y = bullet_size
+        bullet_image_x = bullet_size
+        bullet_image = p.transform.scale(bullet_image, (bullet_image_x, bullet_image_y))
+        
+        fatman_image_y = monster_size_y
+        fatman_image_x = monster_size_x
+        fatman_image = p.transform.scale(fatman_image, (fatman_image_x, fatman_image_y))
+        
+        # Çizim
+        screen.blit(player_image, (player_pos_x,player_pos_y))
+        for bullet in bullets:
+            screen.blit(bullet_image, (bullet[0], bullet[1]))
+
+
+        for monster in monsters:
+            screen.blit(fatman_image, (monster[0], monster[1]))
+        #
+        
         p.draw.rect(screen, Blue, (0, screen_size_y, screen_size_x, 100)) # Arayüz
         
         # Text
