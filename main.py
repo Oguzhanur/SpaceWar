@@ -32,6 +32,7 @@ player_speed = 0.4
 
 score = 0
 # Bullet
+bullet_max_shoot = 30
 bullet_shoot = 0
 bullet_size = 30
 bullet_color = (0, 0, 0)
@@ -75,6 +76,7 @@ p.display.set_caption("FlappyWariar")
 
 full_screen = False
 
+started = False
 running = True
 while running:
     current_time = time.time()
@@ -82,10 +84,15 @@ while running:
     for event in p.event.get():
         if event.type == p.QUIT:
             running = False
+            p.quit
 
     screen.fill(Background)
     
     mouse_x, mouse_y = p.mouse.get_pos()
+    
+    
+    if started:
+        pass
     
     # Bird
 
@@ -106,11 +113,14 @@ while running:
             if player_pos_y < screen_size_y - player_size_y:
                 player_pos_y += player_speed
 
-        if keys[p.K_x] and can_fire and current_time - last_fire_time >= fire_cooldown:
+        if keys[p.K_x] and can_fire and current_time - last_fire_time >= fire_cooldown and bullet_shoot < bullet_max_shoot :
             bullet_shoot += 1
             new_bullet = [player_pos_x + player_size_x // 2 - bullet_size // 2, player_pos_y]
             bullets.append(new_bullet)
             last_fire_time = current_time
+            
+        if keys[p.K_ESCAPE]:
+            p.quit()
             
         if keys[p.K_F1]:
             developer_mode = True
@@ -187,6 +197,8 @@ while running:
         
         # Çizim
         screen.blit(player_image, (player_pos_x,player_pos_y))
+        
+        
         for bullet in bullets:
             screen.blit(bullet_image, (bullet[0], bullet[1]))
 
@@ -195,7 +207,11 @@ while running:
             screen.blit(fatman_image, (monster[0], monster[1]))
         #
         
-        p.draw.rect(screen, Blue, (0, screen_size_y, screen_size_x, 100)) # Arayüz
+        p.draw.rect(screen, A_blue, (0, screen_size_y, screen_size_x, 100)) # Arayüz
+        
+        p.draw.rect(screen, White, (30, 525, 100, 60))
+        
+        p.draw.rect(screen, White, (160, 525, 100, 60))
         
         # Text
     
@@ -212,14 +228,19 @@ while running:
             text1 = font.render("", True, Black)
             text2 = font.render("", True, Black)
             text3 = font.render("", True, Black)
-        
-        
+
         screen.blit(text0, (0, 0))
         screen.blit(text1, (0, 30))
         screen.blit(text2, (0, 60))
         screen.blit(text3, (0, 90))
         
-        p.draw.rect(screen, A_blue, (0, screen_size_y, screen_size_x, 100)) # Arayüz
+        a_text1 = font.render(f"{bullet_shoot}/{bullet_max_shoot}", True, Black)
+        a_text2 = font.render(f"{score}", True, Black)
+        
+        
+        screen.blit(a_text1, (48, 535))
+        screen.blit(a_text2, (160 + 35, 535))
+    
 
     p.display.flip()
 
