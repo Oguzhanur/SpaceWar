@@ -1,5 +1,6 @@
 import pygame as p
-import sys, time, random
+import sys, time, random, json
+from systems import levels as ll
 
 p.init()
 
@@ -46,18 +47,23 @@ last_fire_time = 0
 # Main Colors
 Black = (0, 0, 0)
 White = (255, 255, 255)
-Background = (128, 128, 128)
 Red = (255, 0, 0)
+Green = (0, 255, 0)
 Blue = (0, 0, 255)
 Orange = (255, 128, 0)
 
 # Alt Colors
 Dark_green = (0, 102, 0)  # Koyu yeşil
-A_blue = (14, 16, 215)
+A_blue = (7, 8, 125)
+Background = (53, 53, 53)
+Start_Background = (65, 65, 65)
+ft_green = (125, 8, 7)
 
-
+# Json
 
 # Monsters
+
+level = 1
 
 monster_size_x = 50
 monster_size_y = 50
@@ -69,22 +75,51 @@ spawn_interval = 2  # spawn time
 last_spawn_time = 0
     
 
-
-
-
-p.display.set_caption("FlappyWariar")
+p.display.set_caption("FlappyWar")
 
 full_screen = False
 
 started = False
+screen_page = 0
+level = 0
 running = True
-while running:
+auto_start = False
+
+mod_support = True
+
+# json
+difficulty = "none"
+
+if auto_start:
+    screen_page = 1
+
+
+mod_support = True
+
+while screen_page == 0 and auto_start == False:
+    for event in p.event.get():
+        if event.type == p.QUIT:
+            p.quit()
+            sys.exit()
+        if event.type == p.KEYDOWN:
+            if event.key == p.K_SPACE:
+                screen_page = 1
+    
+    screen.fill(Start_Background)
+    
+    one_start = font.render("Space to start", True, White)
+        
+    screen.blit(one_start, (300, 275))
+    
+    p.display.flip()
+
+while screen_page == 1:
     current_time = time.time()
 
     for event in p.event.get():
         if event.type == p.QUIT:
-            running = False
-            p.quit
+            p.quit()
+            sys.exit()
 
     screen.fill(Background)
     
@@ -93,6 +128,38 @@ while running:
     
     if started:
         pass
+    
+    # Json
+    
+    json_path = ll.get_json_path(level) 
+    
+    if mod_support == True:
+        try:
+            with open(ll.json_file, 'r') as ll.json_file:
+                data = json.load(ll.json_file)
+    
+        except FileNotFoundError:
+            print(f"'{ll.json_file}' Json file not founded (JNF)")
+            mod_support = False
+        except KeyError as e:
+            print(f"KeyError: '{e}' JSON dosyasında hata var (BJ)")
+            mod_support = False
+        except Exception as e:
+            print(f"An error occurred: {e} (J-)")
+            mod_support = False
+        else :
+            mod_support = True
+            
+            difficulty = data['difficulty']
+        
+        print(json_path)
+    
+    if mod_support != True:
+        pass
+        
+        
+            
+            
     
     # Bird
 
@@ -223,23 +290,34 @@ while running:
             text1 = font.render(f"x: {mouse_x} y: {mouse_y}", True, Black)
             text2 = font.render(f"fire: {bullet_shoot}", True, Black)
             text3 = font.render(f"score: {score}", True, Black)
+            if mod_support:
+                text4 = font.render("json files: on", True, Green)
+            else:
+                text4 = font.render("json files: off", True, Red)
+            
         else:
             text0 = font.render("", True, Black)
             text1 = font.render("", True, Black)
             text2 = font.render("", True, Black)
             text3 = font.render("", True, Black)
+            text4 = font.render("", True, Black)
 
         screen.blit(text0, (0, 0))
         screen.blit(text1, (0, 30))
         screen.blit(text2, (0, 60))
         screen.blit(text3, (0, 90))
+        screen.blit(text4, (0, 120))
         
         a_text1 = font.render(f"{bullet_shoot}/{bullet_max_shoot}", True, Black)
         a_text2 = font.render(f"{score}", True, Black)
         
+        alt_text1 = font.render(f"{difficulty}", True, Black)
+        
         
         screen.blit(a_text1, (48, 535))
         screen.blit(a_text2, (160 + 35, 535))
+        
+        screen.blit(alt_text1, (300, 535))
     
 
     p.display.flip()
