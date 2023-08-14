@@ -1,0 +1,5 @@
+just use this names:
+
+fat_man.png
+bullet.png
+player.png
