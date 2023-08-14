@@ -1,6 +1,6 @@
 import pygame as p
 import sys, time, random, json
-from systems import levels as ll
+import mods.levels.levels as mll
 
 p.init()
 
@@ -59,8 +59,6 @@ Background = (53, 53, 53)
 Start_Background = (65, 65, 65)
 ft_green = (125, 8, 7)
 
-# Json
-
 # Monsters
 
 level = 1
@@ -81,7 +79,7 @@ full_screen = False
 
 started = False
 screen_page = 0
-level = 0
+level = 1
 running = True
 auto_start = False
 
@@ -96,20 +94,34 @@ if auto_start:
 
 mod_support = True
 
-while screen_page == 0 and auto_start == False:
+button_rect = p.Rect((240, 250, 250, 70))
+
+def level_system():
+    pass
+
+while screen_page == 0:
     for event in p.event.get():
         if event.type == p.QUIT:
             p.quit()
             sys.exit()
         if event.type == p.KEYDOWN:
-            if event.key == p.K_SPACE:
+            if event.key == p.K_ESCAPE:
                 screen_page = 1
-    
+            if event.key == p.K_q:
+                screen_page = 1
+            if event.key == p.K_e:
+                screen_page = 1
+        elif event.type == p.MOUSEBUTTONDOWN:
+            if button_rect.collidepoint(event.pos):
+                screen_page = 1
+                
     screen.fill(Start_Background)
     
-    one_start = font.render("Space to start", True, White)
-        
-    screen.blit(one_start, (300, 275))
+    one_start = font.render("Play", True, White)
+    
+    p.draw.rect(screen, ft_green, button_rect)
+
+    screen.blit(one_start, (345, 260))
     
     p.display.flip()
 
@@ -129,39 +141,17 @@ while screen_page == 1:
     if started:
         pass
     
-    # Json
+    # Modding
     
-    json_path = ll.get_json_path(level) 
-    
-    if mod_support == True:
-        try:
-            with open(ll.json_file, 'r') as ll.json_file:
-                data = json.load(ll.json_file)
-    
-        except FileNotFoundError:
-            print(f"'{ll.json_file}' Json file not founded (JNF)")
-            mod_support = False
-        except KeyError as e:
-            print(f"KeyError: '{e}' JSON dosyasında hata var (BJ)")
-            mod_support = False
-        except Exception as e:
-            print(f"An error occurred: {e} (J-)")
-            mod_support = False
-        else :
-            mod_support = True
-            
-            difficulty = data['difficulty']
-        
-        print(json_path)
-    
-    if mod_support != True:
-        pass
-        
-        
-            
-            
-    
-    # Bird
+    json_path = mll.get_json_path(level)
+
+    if json_path:
+        with open(json_path) as f:
+            d = json.load(f)
+    else:
+        print("Json error ")
+     
+    # Bird++
 
     if input_engine:
         keys = p.key.get_pressed()
@@ -239,17 +229,44 @@ while screen_page == 1:
             monsters.remove(monster)
 
     if draw_engine:
-        # Resim yükleme
-        player_image_path = "assets//image//player.png" 
-        player_image = p.image.load(player_image_path)
+        # Adding mod Assets
         
-        bullet_image_path = "assets//image//bullet.png" 
-        bullet_image = p.image.load(bullet_image_path)
         
-        fatman_image_path = "assets//image//fat_man.png" 
-        fatman_image = p.image.load(fatman_image_path)
+        try:
+            player_image_path = "mods//assets//player.png" 
+            player_image = p.image.load(player_image_path)
+            set_player_img = True
+        except FileNotFoundError:
+            set_player_img = False
         
-        # Resim boyutlandırma
+        try:
+            bullet_image_path = "mods//assets//bullet.png" 
+            bullet_image = p.image.load(bullet_image_path)
+            set_bullet_img = True
+        except FileNotFoundError:
+            set_bullet_img = False
+        
+        try:
+            fatman_image_path = "mods//assets//fat_man.png" 
+            fatman_image = p.image.load(fatman_image_path)
+            set_fatman_img = True
+        except FileNotFoundError:
+            set_fatman_img = False
+            
+        
+        if not set_player_img:
+            player_image_path = "assets//image//player.png" 
+            player_image = p.image.load(player_image_path)
+        if not set_bullet_img:
+            bullet_image_path = "assets//image//bullet.png" 
+            bullet_image = p.image.load(bullet_image_path)
+        if not set_fatman_img:
+            fatman_image_path = "assets//image//fat_man.png" 
+            fatman_image = p.image.load(fatman_image_path)
+        
+        
+        
+        # Update images 
         player_image_y = player_size_y
         player_image_x = player_size_x
         player_image = p.transform.scale(player_image, (player_image_x, player_image_y))
@@ -262,7 +279,7 @@ while screen_page == 1:
         fatman_image_x = monster_size_x
         fatman_image = p.transform.scale(fatman_image, (fatman_image_x, fatman_image_y))
         
-        # Çizim
+        # Write
         screen.blit(player_image, (player_pos_x,player_pos_y))
         
         
