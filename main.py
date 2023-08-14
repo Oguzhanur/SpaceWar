@@ -94,26 +94,35 @@ if auto_start:
 
 mod_support = True
 
+last_score = 0
+
+screen_page = 0
+
+
+
+
 button_rect = p.Rect((240, 250, 250, 70))
 
-def level_system():
-    pass
-
 while screen_page == 0:
+    
     for event in p.event.get():
         if event.type == p.QUIT:
             p.quit()
             sys.exit()
-        if event.type == p.KEYDOWN:
+        elif event.type == p.KEYDOWN:
             if event.key == p.K_ESCAPE:
-                screen_page = 1
-            if event.key == p.K_q:
-                screen_page = 1
-            if event.key == p.K_e:
-                screen_page = 1
+                p.quit()
+                sys.exit()
         elif event.type == p.MOUSEBUTTONDOWN:
             if button_rect.collidepoint(event.pos):
                 screen_page = 1
+        
+    button_rect = p.Rect((240, 250, 250, 70))
+    if input_engine:
+        keys = p.key.get_pressed()
+        
+        if keys[p.K_e]:
+            screen_page = 1
                 
     screen.fill(Start_Background)
     
@@ -125,6 +134,44 @@ while screen_page == 0:
     
     p.display.flip()
 
+while screen_page == 2:
+    for event in p.event.get():
+        if event.type == p.QUIT:
+            p.quit()
+            sys.exit()
+        elif event.type == p.KEYDOWN:
+            if event.key == p.K_ESCAPE:
+                p.quit()
+                sys.exit()
+        elif event.type == p.MOUSEBUTTONDOWN:
+            if button2_rect.collidepoint(event.pos):
+                screen_page = 1
+            if button2_close_rect.collidepoint(event.pos):
+                screen_page = 0
+        
+        
+    button2_rect = p.Rect((420, 450, 250, 70))
+    button2_close_rect = p.Rect((80, 450, 250, 70))
+    
+    if input_engine:
+        keys = p.key.get_pressed()
+        
+        if keys[p.K_e]:
+            screen_page = 1
+                
+    screen.fill(Start_Background)
+    
+    tow_start = font.render("Try again", True, White)
+    tow_close = font.render("Main Menu", True, White)
+    
+    p.draw.rect(screen, Green, button2_rect)
+    p.draw.rect(screen, ft_green, button2_close_rect)
+
+    screen.blit(tow_start, (485, 465))
+    screen.blit(tow_close, (165, 465))
+    
+    p.display.flip()
+            
 while screen_page == 1:
     current_time = time.time()
 
@@ -143,8 +190,8 @@ while screen_page == 1:
     
     # Modding
     
-    json_path = mll.get_json_path(level)
-
+    json_path = mll.get_json_path(2)
+    
     if json_path:
         with open(json_path) as f:
             d = json.load(f)
@@ -197,7 +244,25 @@ while screen_page == 1:
     # Bullet Config
     bullets_to_remove = []
     monsters_to_remove = []
+    enemy_remove_circle = []
+    
+    # enemy Explosion
+    def create_enemy_circle(x, y):
+        enemy_remove_circle.append({"x": x, "y": y, "radius": 200})
 
+    for enemy_circle in enemy_remove_circle:
+        enemy_circle["radius"] -= 0
+
+        if enemy_circle["radius"] <= 0:
+            enemy_remove_circle.remove(enemy_circle)
+            
+    for enemy_circle in enemy_remove_circle:
+        x = enemy_circle["x"]
+        y = enemy_circle["y"]
+        radius = enemy_circle["radius"]
+        p.draw.circle(screen, Red, (x, y), radius)  # Yuvarlağı çiz
+        
+    # Bullet
     for bullet in bullets:
         bullet[1] -= bullet_speed
 
@@ -214,6 +279,7 @@ while screen_page == 1:
         bullets.remove(bullet)
 
     for monster in monsters_to_remove:
+        create_enemy_circle(1,1)
         monsters.remove(monster)
         score += 1
         
@@ -305,12 +371,13 @@ while screen_page == 1:
             else:
                 text0 = font.render("Windowed", True, Black)
             text1 = font.render(f"x: {mouse_x} y: {mouse_y}", True, Black)
-            text2 = font.render(f"fire: {bullet_shoot}", True, Black)
+            text2 = font.render(f"fire: {bullet_shoot}/{bullet_max_shoot}", True, Black)
             text3 = font.render(f"score: {score}", True, Black)
             if mod_support:
                 text4 = font.render("json files: on", True, Green)
             else:
                 text4 = font.render("json files: off", True, Red)
+            text5 = font.render(f"path: {json_path}", True, Black)
             
         else:
             text0 = font.render("", True, Black)
@@ -318,12 +385,14 @@ while screen_page == 1:
             text2 = font.render("", True, Black)
             text3 = font.render("", True, Black)
             text4 = font.render("", True, Black)
+            text5 = font.render("", True, Black)
 
         screen.blit(text0, (0, 0))
         screen.blit(text1, (0, 30))
         screen.blit(text2, (0, 60))
         screen.blit(text3, (0, 90))
         screen.blit(text4, (0, 120))
+        screen.blit(text5, (0, 150))
         
         a_text1 = font.render(f"{bullet_shoot}/{bullet_max_shoot}", True, Black)
         a_text2 = font.render(f"{score}", True, Black)
@@ -338,6 +407,3 @@ while screen_page == 1:
     
 
     p.display.flip()
-
-p.quit()
-sys.exit()
